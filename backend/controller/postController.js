@@ -3,24 +3,48 @@ import cloudinary from "../utils/cloudinary.js";
 // create post
 export const createPost = async (req, res) => {
     try {
-        const {title, content, tags } = req.body;
+        const { title, content, tags } = req.body;
         const image = req.file;
-        if(!title || !content || !tags){
+
+        // Validate required fields
+        if (!title || !content || !tags) {
             return res.status(400).json({ message: "All fields are required" });
         }
-        if(!image){
+        
+        if (!image) {
             return res.status(400).json({ message: "Image is required" });
         }
-        const base64Image = Buffer.from(image.buffer).toString("base64");
-        const imageurl = `data:${image.mimetype};base64,${base64Image}`;
-        const result = await cloudinary.uploader.upload(imageurl);
 
-        const post = await Post.create({ title, content, tags, image: result.secure_url, user: req.user.id });
+        console.log("Received data:", { title, content, tags, hasFile: !!image });
+
+        // Convert image buffer to base64
+        const base64Image = Buffer.from(image.buffer).toString('base64');
+        const imageUrl = `data:${image.mimetype};base64,${base64Image}`;
+
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(imageUrl, {
+            folder: 'blog-posts' // Optional: specify a folder in Cloudinary
+        });
+
+        // Parse tags if it's a string (from JSON.stringify)
+        const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+
+        // Create post
+        const post = await Post.create({ 
+            title, 
+            content, 
+            tags: parsedTags, 
+            image: result.secure_url, 
+            user: req.user.id 
+        });
+
         res.status(201).json(post);
-    } 
-    catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal server error" });
+    } catch (error) {
+        console.error("Error in createPost:", error);
+        res.status(500).json({ 
+            message: "Internal server error",
+            error: error.message 
+        });
     }
 };
 
