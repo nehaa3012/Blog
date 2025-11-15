@@ -1,4 +1,4 @@
-'use client';
+// 'use client';
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -24,24 +24,28 @@ export default function CreatePost() {
   const [previewImage, setPreviewImage] = useState(null);
   const navigate = useNavigate();
 
-  // Handle input changes
+   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: files ? files[0] : value
-    }));
-
-    // Handle image preview
     if (name === 'image' && files && files[0]) {
+      const file = files[0];
+      setFormData(prev => ({
+        ...prev,
+        image: file
+      }));
+      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
       };
-      reader.readAsDataURL(files[0]);
+      reader.readAsDataURL(file);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
     }
   };
-
   // Handle tag input
   const handleAddTag = (e) => {
     if (e.key === 'Enter' && tagInput.trim()) {
@@ -67,7 +71,7 @@ export default function CreatePost() {
   // Form submission
  const handleSubmit = async (e) => {
   e.preventDefault();
-  console.log("Form submitted with:", { ...formData, tags });
+  console.log("Form submitted with:", formData );
 
   if (formData.tags.length === 0) {
     toast.error("Please add at least one tag");
@@ -94,7 +98,7 @@ export default function CreatePost() {
       hasImage: !!formData.image
     });
 
-    const response = await API.post("/api/posts/create", data, {
+    const response = await API.post("/api/posts", data, {
       headers: {
         'Content-Type': 'multipart/form-data' // Explicitly set content type
       }
@@ -216,10 +220,10 @@ export default function CreatePost() {
                 </p>
               </div>
               
-              {/* Tags Display */}
-              {/* {tags.length > 0 && (
+              Tags Display
+              {formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {tags.map((tag) => (
+                  {formData.tags.map((tag) => (
                     <span
                       key={tag}
                       className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
@@ -235,7 +239,7 @@ export default function CreatePost() {
                     </span>
                   ))}
                 </div>
-              )} */}
+              )}
             </div>
 
             <div className="flex justify-end space-x-4 pt-4">

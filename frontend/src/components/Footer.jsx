@@ -1,8 +1,10 @@
 import React from 'react'
+import {FooterSection} from './footer-section'
 
-function Footer() {
+function Footer() 
+{
   return (
-    <div>Footer</div>
+    <FooterSection />
   )
 }
 
