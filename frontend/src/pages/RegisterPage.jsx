@@ -1,5 +1,5 @@
 import React from 'react'
-import RegisterCardSection from '../components/login-signup'
+import RegisterCardSection from '../components/ui/demo'
 
 function RegisterPage() {
   return (

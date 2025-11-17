@@ -34,7 +34,7 @@ export function Header() {
 		},
 		{
 			label: 'About',
-			href: '#',
+			href: '/about',
 		},
 	];
 
@@ -112,15 +112,14 @@ export function Header() {
 						<DropdownMenuSeparator />
 						<DropdownMenuItem>
 							<LogOut className="mr-2 h-4 w-4" />
-							<span>Log out</span>
+							<Link to="/register">Log out</Link>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 				)}
-					<Link to="/register">
-					
+					{/* <Link to="/register">
 					<Button className="ml-6">Get Started</Button>
-					</Link>
+					</Link> */}
 				</div>
 				<Button
                     size="icon"

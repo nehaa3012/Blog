@@ -14,9 +14,6 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({credentials:true, origin:"http://localhost:5173"}))
-app.get("/", (req, res) => {
-    res.send("Hello World!");
-});
 
 app.use("/api/auth", authRoute);
 app.use("/api/posts", postRoute);

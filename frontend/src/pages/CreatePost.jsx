@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ImagePlus, X, Tag } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import toast  from 'react-hot-toast';
 import API from '../config/api';
 
 export default function CreatePost() {
@@ -50,7 +50,9 @@ export default function CreatePost() {
   const handleAddTag = (e) => {
     if (e.key === 'Enter' && tagInput.trim()) {
       e.preventDefault();
+
       const newTag = tagInput.trim().toLowerCase();
+      console.log(newTag);
       if (!formData.tags.includes(newTag) && formData.tags.length < 5) {
         setFormData(prev => ({
           ...prev,
@@ -71,13 +73,24 @@ export default function CreatePost() {
   // Form submission
  const handleSubmit = async (e) => {
   e.preventDefault();
-  console.log("Form submitted with:", formData );
-
+  console.log(formData);
+  
+  // Basic validation
+  if (!formData.title.trim()) {
+    toast.error("Please enter a title");
+    return;
+  }
+  
+  if (!formData.content.trim()) {
+    toast.error("Please enter some content");
+    return;
+  }
+  console.log(formData.tags);
   if (formData.tags.length === 0) {
     toast.error("Please add at least one tag");
     return;
   }
-
+  console.log("hey");
   if (!formData.image) {
     toast.error("Please select an image");
     return;
@@ -85,31 +98,73 @@ export default function CreatePost() {
 
   try {
     setIsLoading(true);
-    const data = new FormData();
-    data.append("title", formData.title);
-    data.append("content", formData.content);
-    data.append("tags", JSON.stringify(formData.tags)); // Changed to send tags as JSON string
-    data.append("image", formData.image); // Make sure this is the file object
+    
+    // Create FormData
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("content", formData.content);
+    formDataToSend.append("tags", JSON.stringify(formData.tags));
+    formDataToSend.append("image", formData.image);
 
-    console.log("Sending request with form data:", {
-      title: formData.title,
-      content: formData.content,
-      tags: formData.tags,
-      hasImage: !!formData.image
-    });
+    // Log FormData entries
+    console.log('FormData entries:');
+    for (let [key, value] of formDataToSend.entries()) {
+      console.log(key, value);
+    }
 
-    const response = await API.post("/api/posts", data, {
+    // Log API configuration
+    console.log('API base URL:', API.defaults.baseURL);
+    console.log('Request headers:', API.defaults.headers);
+
+    // Make the API request
+    console.log('Sending request to /api/posts');
+    const response = await API.post("/api/posts/create", formDataToSend, {
       headers: {
-        'Content-Type': 'multipart/form-data' // Explicitly set content type
-      }
+        'Content-Type': 'multipart/form-data'
+      },
+      withCredentials: true
     });
-
-    console.log("Response:", response.data);
+    
+    console.log("Post created successfully:", response);
     toast.success("Post created successfully!");
-    navigate("/");
+    
+    // Redirect to home page after a short delay
+    setTimeout(() => {
+      navigate("/");
+    }, 1000);
+    
   } catch (error) {
-    console.error("Error creating post:", error);
-    toast.error(error.response?.data?.message || "Failed to create post");
+    console.error("Full error object:", error);
+    
+    if (error.code) console.error("Error code:", error.code);
+    if (error.message) console.error("Error message:", error.message);
+    
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      console.error("Response data:", error.response.data);
+      console.error("Response status:", error.response.status);
+      console.error("Response headers:", error.response.headers);
+      
+      if (error.response.status === 401) {
+        toast.error("Please log in to create a post");
+      } else if (error.response.status === 400) {
+        const errorMsg = error.response.data?.message || "Invalid data provided";
+        console.error("Validation errors:", error.response.data?.errors);
+        toast.error(errorMsg);
+      } else if (error.response.status === 500) {
+        toast.error("Server error. Please check the server logs.");
+      } else {
+        toast.error(error.response.data?.message || "Failed to create post");
+      }
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error("No response received. Request:", error.request);
+      toast.error("No response from server. Please check your connection and make sure the backend is running.");
+    } else {
+      // Something happened in setting up the request
+      console.error("Request setup error:", error.message);
+      toast.error(`Request error: ${error.message}`);
+    }
   } finally {
     setIsLoading(false);
   }
@@ -220,7 +275,7 @@ export default function CreatePost() {
                 </p>
               </div>
               
-              Tags Display
+              {/* Tags Display */}
               {formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.tags.map((tag) => (

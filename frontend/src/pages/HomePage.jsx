@@ -1,22 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+import Navbar from '../components/Navbar'
 import Posts from '../components/Posts'
-import API from '../config/api'
-
+import Footer from '../components/Footer'
 function HomePage() {
-    const [posts, setPosts] = useState([])
-    const getPosts = async () => {
-        const response = await API.get("/api/posts/all")
-        if (response) {
-            setPosts(response.data)
-            console.log(response.data)
-        }
-    }
-    useEffect(() => {
-        getPosts()
-    }, [])
   return (
     <div>
         <Posts />
+        <Footer />
     </div>
   )
 }
