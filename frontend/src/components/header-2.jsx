@@ -17,6 +17,8 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { LogOut, User } from 'lucide-react';
+import API from '../config/api';
+import toast from 'react-hot-toast';
 
 export function Header() {
 	const {user} = useContext(AuthContext);
@@ -37,6 +39,15 @@ export function Header() {
 			href: '/about',
 		},
 	];
+	const handleLogout = () =>{
+		API.post("/api/auth/logout")
+		.then((response) => {
+			toast.success("Logout successfully");
+		})
+		.catch((error) => {
+			toast.error("Logout failed");
+		});
+	}
 
 	React.useEffect(() => {
 		if (open) {
@@ -111,15 +122,15 @@ export function Header() {
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem>
-							<LogOut className="mr-2 h-4 w-4" />
-							<Link to="/register">Log out</Link>
+							<LogOut  className="mr-2 h-4 w-4" />
+							<span onClick={handleLogout}>Log out</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 				)}
-					{/* <Link to="/register">
+					<Link to="/register">
 					<Button className="ml-6">Get Started</Button>
-					</Link> */}
+					</Link>
 				</div>
 				<Button
                     size="icon"

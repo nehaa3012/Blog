@@ -21,9 +21,33 @@ import {
   ArrowRight,
   Chrome,
 } from "lucide-react";
+import API from "../config/api";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function LoginCardSection() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleLogin = () => {
+    API.post("/api/auth/login", user)
+      .then((response) => {
+        toast.success("Login successfully");
+        if(response.status === 200){
+          navigate("/");
+        }
+        console.log(response.data);
+      })
+      .catch((error) => {
+        toast.error("Login failed");
+        console.log(error);
+      });
+  };
+
 
   const canvasRef = useRef(null);
   useEffect(() => {
@@ -142,9 +166,9 @@ export default function LoginCardSection() {
 
       {/* Header */}
       <header className="absolute left-0 right-0 top-0 flex items-center justify-between px-6 py-4 border-b border-zinc-800/80">
-        <span className="text-xs tracking-[0.14em] uppercase text-zinc-400">
+        {/* <span className="text-xs tracking-[0.14em] uppercase text-zinc-400">
           NOVA
-        </span>
+        </span> */}
         <Button
           variant="outline"
           className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80"
@@ -171,7 +195,9 @@ export default function LoginCardSection() {
               </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                <Input
+                <Input 
+                value={user.email}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
                   id="email"
                   type="email"
                   placeholder="you@example.com"
@@ -187,6 +213,8 @@ export default function LoginCardSection() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                 <Input
+                value={user.password}
+                onChange={(e) => setUser({ ...user, password: e.target.value })}
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
@@ -222,7 +250,7 @@ export default function LoginCardSection() {
               </a>
             </div>
 
-            <Button className="w-full h-10 rounded-lg bg-zinc-50 text-zinc-900 hover:bg-zinc-200">
+            <Button onClick={handleLogin} className="w-full h-10 rounded-lg bg-zinc-50 text-zinc-900 hover:bg-zinc-200">
               Continue
             </Button>
 

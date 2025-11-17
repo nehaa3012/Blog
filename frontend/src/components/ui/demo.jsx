@@ -15,9 +15,29 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Github, Chrome, User, Mail, Lock, ArrowRight } from "lucide-react";
+import API from "../../config/api";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function RegisterCardSection() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const handleRegister = () => {
+    API.post("/api/auth/register", user)
+      .then((response) => {
+        toast.success("Register successfully");
+        navigate("/");
+      })
+      .catch((error) => {
+        toast.error("Register failed");
+      });
+  };
 
   const canvasRef = useRef(null);
   useEffect(() => {
@@ -123,9 +143,7 @@ export default function RegisterCardSection() {
 
       {/* Header */}
       <header className="absolute left-0 right-0 top-0 flex items-center justify-between px-6 py-4 border-b border-zinc-800/80">
-        <span className="text-xs tracking-[0.14em] uppercase text-zinc-400">
-          NOVA
-        </span>
+    
         <Button
           variant="outline"
           className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80"
@@ -153,6 +171,8 @@ export default function RegisterCardSection() {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                 <Input
+                 value={user.name}
+                 onChange={(e) => setUser({ ...user, name: e.target.value })}
                   id="name"
                   type="text"
                   placeholder="John Doe"
@@ -168,6 +188,8 @@ export default function RegisterCardSection() {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                 <Input
+                value={user.email}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
                   id="email"
                   type="email"
                   placeholder="you@example.com"
@@ -183,6 +205,8 @@ export default function RegisterCardSection() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                 <Input
+                value={user.password}
+                onChange={(e) => setUser({ ...user, password: e.target.value })}
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
@@ -208,7 +232,7 @@ export default function RegisterCardSection() {
               </Label>
             </div>
 
-            <Button className="w-full h-10 rounded-lg bg-zinc-50 text-zinc-900 hover:bg-zinc-200">
+            <Button onClick={handleRegister} className="w-full h-10 rounded-lg bg-zinc-50 text-zinc-900 hover:bg-zinc-200">
               Sign Up
             </Button>
 

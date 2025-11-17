@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 // import { format } from 'date-fns';
@@ -10,6 +11,7 @@ import API from '../config/api';
 function Posts() {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   const getPosts = async () => {
     try {
@@ -56,7 +58,11 @@ function Posts() {
       
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((post) => (
-          <Card key={post._id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
+          <Card 
+            key={post._id} 
+            className="overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full cursor-pointer"
+            onClick={() => navigate(`/posts/${post._id}`)}
+          >
             <div className="relative h-48 overflow-hidden">
               <img 
                 src={post.image} 

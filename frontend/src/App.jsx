@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage'
 import CreatePost from './pages/CreatePost'
 import EditPage from './pages/EditPage'
 import BlogPage from './pages/BlogPage'
+import PostDetail from './components/PostDetail'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import RequireAuth from './components/RequireAuth'
@@ -24,7 +25,8 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="create" element={<CreatePost />} />
           <Route path="edit/:id" element={<EditPage />} />
-          <Route path="blog/:id" element={<BlogPage />} />
+          <Route path="blog" element={<BlogPage />} />
+          <Route path="posts/:id" element={<PostDetail />} />
         </Route>
         <Route path="*" element= {"404 Not Found"}/>
       </Routes>
