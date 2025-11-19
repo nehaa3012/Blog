@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')).render(
     <AuthContextProvider>
       <BrowserRouter>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <App />
+          <App /> 
           <Toaster />
         </ThemeProvider>
       </BrowserRouter>

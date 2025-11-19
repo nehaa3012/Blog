@@ -9,8 +9,9 @@ import EditPage from './pages/EditPage'
 import BlogPage from './pages/BlogPage'
 import PostDetail from './components/PostDetail'
 import Navbar from './components/Navbar'
-import Footer from './components/Footer'
+// import Footer from './components/Footer'
 import RequireAuth from './components/RequireAuth'
+import AboutPage from './pages/AboutPage'
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/home?" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route element={<RequireAuth />}>

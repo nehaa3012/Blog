@@ -82,7 +82,7 @@ export function Header() {
 					}
                 )}>
 				
-				<h1 className='text-2xl font-bold'>Blog <span className='text-orange-500'>Nest</span> </h1>
+				<h1 className='text-2xl font-bold hover:text-red-700'>Blog <span className='text-red-700'>Nest</span> </h1>
 				<div className="hidden items-center gap-6 md:flex">
 					<ModeToggle />
 					{links.map((link, i) => (
