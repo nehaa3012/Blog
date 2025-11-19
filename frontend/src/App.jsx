@@ -26,7 +26,7 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route path="profile" element={<ProfilePage />} />
           <Route path="create" element={<CreatePost />} />
-          <Route path="edit/:id" element={<EditPage />} />
+          <Route path="posts/:id/edit" element={<EditPage />} />
           <Route path="blog" element={<BlogPage />} />
           <Route path="posts/:id" element={<PostDetail />} />
         </Route>

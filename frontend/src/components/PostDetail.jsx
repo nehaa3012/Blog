@@ -1,18 +1,78 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, Clock, Tag, ArrowLeft, User } from 'lucide-react';
+import { Calendar, Clock, Tag, ArrowLeft, User, Edit, Trash2, Loader2, X, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { toast } from 'react-hot-toast';
 import API from '../config/api';
+
+// Confirmation Dialog Component
+const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <p className="mb-6 text-gray-600 dark:text-gray-300">{message}</p>
+        <div className="flex justify-end space-x-3">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={onConfirm}>
+            <Check className="mr-2 h-4 w-4" /> Confirm
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleEdit = () => {
+    navigate(`/posts/${id}/edit`);
+  };
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await API.delete(`/api/posts/${id}`);
+      toast.success('Post deleted successfully');
+      navigate('/');
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      toast.error('Failed to delete post');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
+  const openDeleteDialog = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setShowDeleteDialog(false);
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -73,14 +133,49 @@ function PostDetail() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Button 
-        onClick={() => navigate(-1)} 
-        variant="ghost" 
-        className="mb-6"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Posts
-      </Button>
+      <div className="flex justify-between items-center mb-6">
+        <Button 
+          onClick={() => navigate(-1)} 
+          variant="ghost" 
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Posts
+        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={handleEdit}
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1.5"
+          >
+            <Edit className="h-4 w-4" />
+            {/* <span>Edit</span> */}
+            <Link to={`/posts/${post._id}`}>Edit</Link>
+          </Button>
+          <Button 
+            onClick={openDeleteDialog}
+            variant="destructive" 
+            size="sm"
+            className="flex items-center gap-1.5"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+            <span>Delete</span>
+          </Button>
+        </div>
+      </div>
+
+      <ConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={closeDeleteDialog}
+        onConfirm={handleDelete}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone."
+      />
 
       <Card className="overflow-hidden">
         <div className="relative h-96 w-full">

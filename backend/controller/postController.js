@@ -25,6 +25,7 @@ export const createPost = async (req, res) => {
         const result = await cloudinary.uploader.upload(imageUrl, {
             folder: 'blog-posts' // Optional: specify a folder in Cloudinary
         });
+        console.log(result)
 
         // Parse tags if it's a string (from JSON.stringify)
         const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
@@ -77,6 +78,7 @@ export const getPostById = async (req, res) => {
 
 // update post
 export const updatePost = async (req, res) => {
+    console.log(req.body)
     try {
         const post = await Post.findById(req.params.id);
         if(!post){
@@ -85,7 +87,24 @@ export const updatePost = async (req, res) => {
         post.title = req.body.title;
         post.content = req.body.content;
         post.image = req.body.image;
-        post.tags = req.body.tags;
+        // remove previous image if new image is uploaded
+        if(req.file){
+            // console.log(public_id)
+            if(post.image){
+                const public_id = post.image.split('/').pop().split('.')[0];
+            console.log(public_id)
+            await cloudinary.uploader.destroy(public_id);
+            }
+             const base64Image = Buffer.from(req.file.buffer).toString('base64');
+        const imageUrl = `data:${req.file.mimetype};base64,${base64Image}`;
+            const result = await cloudinary.uploader.upload(imageUrl, {
+                folder: 'blog-posts' // Optional: specify a folder in Cloudinary
+            });
+            post.image = result.secure_url;
+        }
+        const parsedTags = typeof req.body.tags === 'string' ? JSON.parse(req.body.tags) : req.body.tags;
+        post.tags = parsedTags;
+
         await post.save();
         res.status(200).json(post);
     } 
