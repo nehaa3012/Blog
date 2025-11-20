@@ -6,8 +6,8 @@ import upload from "../utils/multer.js";
 const router = express.Router();
 
 router.post("/create",isAuth, upload.single("image"), createPost);
-router.get("/all",isAuth, getAllPosts);
-router.get("/:id",isAuth, getPostById);
+router.get("/all", getAllPosts); // Public route
+router.get("/:id", getPostById); // Public route
 router.put("/:id",isAuth, upload.single("image"), updatePost);
 router.delete("/:id",isAuth, deletePost);
 router.delete("/all",isAuth, deleteAllPosts);

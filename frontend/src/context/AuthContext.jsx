@@ -15,9 +15,12 @@ export const AuthContextProvider = ({ children }) => {
                 setUser(response.data);
             }
         } catch (error) {
-            console.log(error);
-        }
-        finally {
+            // Silently handle 401 errors (not logged in)
+            if (error.response?.status !== 401) {
+                console.error("Auth error:", error);
+            }
+            setUser(null);
+        } finally {
             setLoading(false);
         }
     }
