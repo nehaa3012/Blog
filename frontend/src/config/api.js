@@ -1,22 +1,18 @@
 // frontend/src/config/api.js
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_BACKEND_URL;
-
 const API = axios.create({
-  baseURL,
+  baseURL: "https://blog-backend-njkp.onrender.com", 
   withCredentials: true,
   headers: {
-    'Accept': 'application/json',
-    // Don't set Content-Type here - let the browser set it with the correct boundary
+    Accept: "application/json"
   }
 });
 
-// Add request interceptor to handle file uploads
+// For file uploads (don't manually set content-type)
 API.interceptors.request.use((config) => {
-  // Don't set content type for FormData - let the browser set it
   if (config.data instanceof FormData) {
-    delete config.headers['Content-Type'];
+    delete config.headers["Content-Type"];
   }
   return config;
 });
