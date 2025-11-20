@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-hot-toast';
 import API from '../config/api';
+import { AuthContext } from '../context/AuthContext';
 
 // Confirmation Dialog Component
 const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message }) => {
@@ -46,6 +47,7 @@ function PostDetail() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useContext(AuthContext);
 
   const handleEdit = () => {
     navigate(`/posts/${id}/edit`);
@@ -131,6 +133,12 @@ function PostDetail() {
     );
   }
 
+  const isOwner = (() => {
+    const userId = user?._id || user?.id;
+    const postUserId = post?.user?._id || post?.user;
+    return userId && postUserId && userId.toString() === postUserId.toString();
+  })();
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex justify-between items-center mb-6">
@@ -142,30 +150,33 @@ function PostDetail() {
           Back to Posts
         </Button>
         <div className="flex space-x-2">
-          <Button 
-            onClick={handleEdit}
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-1.5"
-          >
-            <Edit className="h-4 w-4" />
-            {/* <span>Edit</span> */}
-            <Link to={`/posts/${post._id}`}>Edit</Link>
-          </Button>
-          <Button 
-            onClick={openDeleteDialog}
-            variant="destructive" 
-            size="sm"
-            className="flex items-center gap-1.5"
-            disabled={isDeleting}
-          >
-            {isDeleting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
-            <span>Delete</span>
-          </Button>
+          {isOwner && (
+            <>
+              <Button 
+                onClick={handleEdit}
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-1.5"
+              >
+                <Edit className="h-4 w-4" />
+                <span>Edit</span>
+              </Button>
+              <Button 
+                onClick={openDeleteDialog}
+                variant="destructive" 
+                size="sm"
+                className="flex items-center gap-1.5"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+                <span>Delete</span>
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

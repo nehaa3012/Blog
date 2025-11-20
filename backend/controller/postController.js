@@ -64,7 +64,7 @@ export const getAllPosts = async (req, res) => {
 // get post by id
 export const getPostById = async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(req.params.id).populate("user");
         if(!post){
             return res.status(404).json({ message: "Post not found" });
         }
@@ -83,6 +83,10 @@ export const updatePost = async (req, res) => {
         const post = await Post.findById(req.params.id);
         if(!post){
             return res.status(404).json({ message: "Post not found" });
+        }
+        // Only the owner of the post can update it
+        if (!req.user || post.user.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Forbidden: you are not the owner of this post" });
         }
         post.title = req.body.title;
         post.content = req.body.content;
@@ -117,11 +121,16 @@ export const updatePost = async (req, res) => {
 // delete post
 export const deletePost = async (req, res) => {
     try {
-        const post = await Post.findByIdAndDelete(req.params.id);
+        const post = await Post.findById(req.params.id);
         if(!post){
             return res.status(404).json({ message: "Post not found" });
         }
-        res.status(200).json(post);
+        // Only the owner can delete
+        if (!req.user || post.user.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Forbidden: you are not the owner of this post" });
+        }
+        await post.remove();
+        res.status(200).json({ message: "Post deleted successfully" });
     } 
     catch (error) {
         console.error(error);
