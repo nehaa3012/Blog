@@ -4,7 +4,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MenuToggleIcon } from '@/components/menu-toggle-icon';
 import { useScroll } from '@/components/use-scroll';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; 
 import { ModeToggle } from './ModelToggle';
 import { AuthContext } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -42,11 +42,21 @@ export function Header() {
 	const handleLogout = () =>{
 		API.post("/api/auth/logout")
 		.then((response) => {
-			toast.success("Logout successfully");
+		toast.success("Logout successfully");
 		})
 		.catch((error) => {
-			toast.error("Logout failed");
+		toast.error("Logout failed");
 		});
+	}
+
+	const handleProfile = () => {
+	    API.get("/api/auth/me")
+	    .then((response) => {
+	        console.log(response.data);
+	    })
+	    .catch((error) => {
+	        console.log(error);
+	    });
 	}
 
 	React.useEffect(() => {
@@ -118,7 +128,7 @@ export function Header() {
 						<DropdownMenuSeparator />
 						<DropdownMenuItem>
 							<User className="mr-2 h-4 w-4" />
-							<span>Profile</span>
+							<span onClick={handleProfile}>Profile</span>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem>

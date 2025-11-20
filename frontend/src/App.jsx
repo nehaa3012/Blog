@@ -23,12 +23,12 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="posts/:id" element={<PostDetail />} />
         <Route element={<RequireAuth />}>
           <Route path="profile" element={<ProfilePage />} />
           <Route path="create" element={<CreatePost />} />
           <Route path="posts/:id/edit" element={<EditPage />} />
           <Route path="blog" element={<BlogPage />} />
-          <Route path="posts/:id" element={<PostDetail />} />
         </Route>
         <Route path="*" element= {"404 Not Found"}/>
       </Routes>
