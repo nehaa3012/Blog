@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, X, Loader2, Image as ImageIcon, Tag as TagIcon } from 'lucide-react';
 import API from '../config/api';
+import { AuthContext } from '../context/AuthContext';
 
 function EditPage() {
   const { id } = useParams();
@@ -20,6 +21,8 @@ function EditPage() {
     watch,
     formState: { errors }
   } = useForm();
+
+  const { user } = useContext(AuthContext);
 
   const tags = watch('tags', []);
 
@@ -43,6 +46,29 @@ function EditPage() {
 
     fetchPost();
   }, [id, setValue, navigate]);
+
+  // Prevent non-owners from editing
+  useEffect(() => {
+    if (!isLoading) {
+      // post data is loaded into form values; we can fetch the post user id again safely
+      const checkOwnership = async () => {
+        try {
+          const resp = await API.get(`/api/posts/${id}`);
+          const post = resp.data;
+          const userId = user?._id || user?.id;
+          const postUserId = post?.user?._id || post?.user;
+          if (userId && postUserId && userId.toString() !== postUserId.toString()) {
+            toast.error('You are not authorized to edit this post');
+            navigate(-1);
+          }
+        } catch (err) {
+          // ignore; fetch errors handled elsewhere
+          console.log(err)
+        }
+      };
+      checkOwnership();
+    }
+  }, [isLoading, id, user, navigate]);
 
   // Handle image upload
   const handleImageChange = (e) => {
