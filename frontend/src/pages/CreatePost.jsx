@@ -119,9 +119,6 @@ export default function CreatePost() {
     // Make the API request
     console.log('Sending request to /api/posts');
     const response = await API.post("/api/posts/create", formDataToSend, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
       withCredentials: true
     });
     
