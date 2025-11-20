@@ -1,8 +1,9 @@
 // frontend/src/config/api.js
 import axios from "axios";
+console.log(import.meta.env.VITE_BACKEND_URL);
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL, 
+  baseURL: import.meta.env.VITE_BACKEND_URL, 
   withCredentials: true,
   headers: {
     Accept: "application/json"
