@@ -22,15 +22,9 @@ console.log(allowedOrigins)
 
 app.use(cors({
     origin: (origin, callback) => {
-        console.log(origin)
-        if (
-            allowedOrigins.indexOf(origin) !== -1
-                || (process.env.NODE_ENV === "development" && !origin)
-        ) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
+        console.log(origin);
+        // Allow all origins including Postman (no origin) and deployed frontend
+        callback(null, true);
     },
 
     credentials: true,
