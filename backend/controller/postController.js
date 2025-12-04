@@ -1,5 +1,8 @@
 import Post from "../models/post.model.js";
+import User from "../models/user.model.js";
 import cloudinary from "../utils/cloudinary.js";
+import redisClient from "../config/redis.js";
+import postQueue from "../queues/PostQueue.js";
 // create post
 export const createPost = async (req, res) => {
     try {
@@ -39,6 +42,19 @@ export const createPost = async (req, res) => {
             user: req.user.id
         });
 
+        // Fetch user to get email
+        const user = await User.findById(req.user.id);
+
+    //  delete cache
+    await redisClient.del('posts:all');
+    // add to job non blocking
+    postQueue.add('post', { post, email: user.email },{
+        attempts: 3,
+        backoff: {
+            type: 'exponential',
+            delay: 5000
+        }
+    });
         res.status(201).json(post);
     } catch (error) {
         console.error("Error in createPost:", error);
@@ -52,7 +68,17 @@ export const createPost = async (req, res) => {
 // get all posts
 export const getAllPosts = async (req, res) => {
     try {
+     const cachedKey = 'posts:all';
+     const cachedPosts = await redisClient.get(cachedKey);
+    //  check cache 
+    if (cachedPosts) {
+        console.log('Served from cache');
+        return res.status(200).json(JSON.parse(cachedPosts));
+    }
+    console.log('Served from database');
         const posts = await Post.find().populate("user").populate("comment");
+        // set cache with time to live
+        await redisClient.setEx(cachedKey, 300, JSON.stringify(posts));
         res.status(200).json(posts);
     }
     catch (error) {
@@ -64,10 +90,21 @@ export const getAllPosts = async (req, res) => {
 // get post by id
 export const getPostById = async (req, res) => {
     try {
+        // per post 
+        const cachedKey = `post:${req.params.id}`;
+        // check cache 
+        const cachedPost = await redisClient.get(cachedKey);
+        if (cachedPost) {
+            console.log('Served from cache');
+            return res.status(200).json(JSON.parse(cachedPost));
+        }
+        console.log('Served from database');
         const post = await Post.findById(req.params.id).populate("user").populate("comment");
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
         }
+        // set cache with time to live
+        await redisClient.setEx(cachedKey, 300, JSON.stringify(post));
         res.status(200).json(post);
     }
     catch (error) {
@@ -110,6 +147,9 @@ export const updatePost = async (req, res) => {
         post.tags = parsedTags;
 
         await post.save();
+        // Invalidate list and single post caches
+        await redisClient.del('posts:all');
+        await redisClient.del(`post:${req.params.id}`);
         res.status(200).json(post);
     }
     catch (error) {
@@ -130,6 +170,9 @@ export const deletePost = async (req, res) => {
             return res.status(403).json({ message: "Forbidden: you are not the owner of this post" });
         }
         await post.remove();
+        // Invalidate list and single post caches
+        await redisClient.del('posts:all');
+        await redisClient.del(`post:${req.params.id}`);
         res.status(200).json({ message: "Post deleted successfully" });
     }
     catch (error) {
@@ -142,6 +185,8 @@ export const deletePost = async (req, res) => {
 export const deleteAllPosts = async (req, res) => {
     try {
         const posts = await Post.deleteMany();
+        // Invalidate list and single post caches
+        await redisClient.del('posts:all');
         res.status(200).json(posts);
     }
     catch (error) {
@@ -164,6 +209,9 @@ export const likePost = async (req, res) => {
             post.likes.push(req.user.id)
         }
         await post.save();
+        // Invalidate list and single post caches
+        await redisClient.del('posts:all');
+        await redisClient.del(`post:${req.params.id}`);
         res.status(200).json(post);
     }
     catch (error) {
