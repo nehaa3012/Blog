@@ -6,12 +6,15 @@ import postRoute from "./routes/postRoute.js";
 import commentRoute from "./routes/commentRoute.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import "./worker/PostWorker.js"; // Start the worker automatically
 
 
 dotenv.config();
 const app = express();
 
+
 connectDB();
+// redisClient.connect(); // Connected in config/redis.js
 
 app.set("trust proxy", 1);
 
